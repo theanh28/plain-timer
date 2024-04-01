@@ -15,13 +15,12 @@ const intervalEndHandler = async (alarm) => {
 }
 
 const badgeTextUpdateHandler = async (alarm) => {
-  const { timer } = await chrome.storage.local.get('timer');
-  const { interval } = timer;
+  const { badge } = await chrome.storage.local.get('badge');
+  let { current, interval } = badge;
 
-  const previousText = await chrome.action.getBadgeText({});
-  const nextText = Number(previousText) === 1 ? interval : Number(previousText) - 1;
-
-  chrome.action.setBadgeText({ text: String(nextText) });
+  current = current <= 1 ? interval : current - 1;
+  chrome.storage.local.set({ 'badge': { ...badge, current } })
+  chrome.action.setBadgeText({ text: String(current) });
 }
 
 // Alarm handler dispatch. Force script wakes up.
@@ -31,11 +30,20 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "badgeTextUpdate") badgeTextUpdateHandler(alarm);
 });
 
-async function clearTimerHandler() {
+async function clearTimer() {
   chrome.storage.local.set({ 'timer': { taskName: "", interval: 0 } });
   chrome.alarms.clear("intervalEnd")
   chrome.alarms.clear("badgeTextUpdate")
 };
+
+function startBadgeCoundown(interval) {
+  // Timer update remaining time til badge text update.
+  chrome.alarms.create("badgeTextUpdate", { periodInMinutes: 1 });
+  // Initial badge text. Another event handler at the top of this file
+  // handles per minute update.
+  chrome.action.setBadgeText({ text: String(interval) });
+  chrome.storage.local.set({ 'badge': { current: interval, interval } });
+}
 
 async function startTimer(message) {
   let { taskName, interval } = message;
@@ -43,26 +51,17 @@ async function startTimer(message) {
   /// For peace of mind
   if (interval <= 0) return;
 
-  // Clear previous alarms
-  await chrome.alarms.clear("intervalEnd");
-  await chrome.alarms.clear("badgeTextUpdate")
-
-  // No need await
   chrome.alarms.create("intervalEnd", { periodInMinutes: interval });
   chrome.storage.local.set({ 'timer': { taskName, interval } });
 
-  // Timer update remaining time til badge text update.
-  chrome.alarms.create("badgeTextUpdate", { periodInMinutes: 1 });
-  // Initial badge text. Another event handler at the top of this file
-  // handles per minute update.
-  chrome.action.setBadgeText({ text: String(interval) });
+  startBadgeCoundown(interval)
 }
 
 // Message interceptor
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   console.log("Background received message", message)
   if (message.action === "clearTimer") {
-    clearTimerHandler()
+    clearTimer()
   } else {
     startTimer(message);
   }
