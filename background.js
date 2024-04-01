@@ -30,6 +30,14 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "badgeTextUpdate") badgeTextUpdateHandler(alarm);
 });
 
+// Prepare on start up for time sync.
+chrome.runtime.onStartup.addListener(async () => {
+  // Move badge text to max as timer starts now.
+  const { badge } = await chrome.storage.local.get('badge');
+  let { interval } = badge;
+  startBadgeCoundown(interval)
+})
+
 async function clearTimer() {
   chrome.storage.local.set({ 'timer': { taskName: "", interval: 0 } });
   chrome.alarms.clear("intervalEnd")
