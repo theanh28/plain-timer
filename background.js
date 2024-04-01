@@ -23,21 +23,6 @@ const badgeTextUpdateHandler = async (alarm) => {
   chrome.action.setBadgeText({ text: String(current) });
 }
 
-// Alarm handler dispatch. Force script wakes up.
-chrome.alarms.onAlarm.addListener((alarm) => {
-  console.log("Alarm received", alarm)
-  if (alarm.name === "intervalEnd") intervalEndHandler(alarm);
-  if (alarm.name === "badgeTextUpdate") badgeTextUpdateHandler(alarm);
-});
-
-// Prepare on start up for time sync.
-chrome.runtime.onStartup.addListener(async () => {
-  // Move badge text to max as timer starts now.
-  const { badge } = await chrome.storage.local.get('badge');
-  let { interval } = badge;
-  startBadgeCoundown(interval)
-})
-
 async function clearTimer() {
   chrome.storage.local.set({ 'timer': { taskName: "", interval: 0 } });
   chrome.alarms.clear("intervalEnd")
@@ -65,6 +50,8 @@ async function startTimer(message) {
   startBadgeCoundown(interval)
 }
 
+/// ======================= Event attach ======================= \\\
+
 // Message interceptor
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   console.log("Background received message", message)
@@ -74,3 +61,18 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     startTimer(message);
   }
 });
+
+// Alarm handler dispatch. Force script wakes up.
+chrome.alarms.onAlarm.addListener((alarm) => {
+  console.log("Alarm received", alarm)
+  if (alarm.name === "intervalEnd") intervalEndHandler(alarm);
+  if (alarm.name === "badgeTextUpdate") badgeTextUpdateHandler(alarm);
+});
+
+// Prepare on start up for time sync.
+chrome.runtime.onStartup.addListener(async () => {
+  // Move badge text to max as timer starts now.
+  const { badge } = await chrome.storage.local.get('badge');
+  let { interval } = badge;
+  startBadgeCoundown(interval)
+})
