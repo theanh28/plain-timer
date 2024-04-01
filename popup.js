@@ -1,11 +1,9 @@
 // Function to populate input fields with current task name and timer interval
-function populateInputFields() {
-  chrome.runtime.sendMessage({ action: "getCurrentTask" }, function(response) {
-    if (response.taskName && response.interval) {
-      document.getElementById("taskNameInput").value = response.taskName;
-      document.getElementById("intervalInput").value = response.interval / 60000;
-    }
-  });
+async function populateInputFields() {
+  const {timer} = await chrome.storage.local.get('timer');
+  document.getElementById("taskNameInput").value = timer.taskName || '';
+  document.getElementById("intervalInput").value = timer.interval || 0;
+  console.log("qwe timer data", timer)
 }
 
 // Call populateInputFields function when popup is opened

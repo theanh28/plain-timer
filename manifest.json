@@ -3,7 +3,9 @@
   "name": "Timer",
   "description": "Base Level Extension",
   "permissions": [
-    "tabs"
+    "tabs",
+    "storage",
+    "alarms"
   ],
   "version": "1.0",
   "action": {
