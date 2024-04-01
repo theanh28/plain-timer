@@ -22,9 +22,17 @@ function clearTimer() {
   document.getElementById("taskNameInput").value = '';
   document.getElementById("intervalInput").value = 0;
   document.getElementById("confirmText").textContent = "Task timer CLEARED";
-
 }
 
 // Add event listener to the Set Timer button
 document.getElementById("setTimerButton").addEventListener("click", setTimer);
+// Add event listener for "Enter" key press in Inputs
+document.getElementById("taskNameInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") setTimer();
+});
+document.getElementById("intervalInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") setTimer();
+});
+
+// Clear Timer btn
 document.getElementById("clearTimerButton").addEventListener("click", clearTimer);
