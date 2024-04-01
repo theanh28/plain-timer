@@ -27,7 +27,7 @@ const badgeTextUpdateHandler = async (alarm) => {
 // Alarm handler dispatch. Force script wakes up.
 chrome.alarms.onAlarm.addListener((alarm) => {
   console.log("Alarm received", alarm)
-  if (alarm === "intervalEnd") intervalEndHandler(alarm);
+  if (alarm.name === "intervalEnd") intervalEndHandler(alarm);
   if (alarm.name === "badgeTextUpdate") badgeTextUpdateHandler(alarm);
 });
 
