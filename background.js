@@ -41,15 +41,9 @@ async function startTimer(message) {
   // );
 
   await chrome.alarms.clear("timer")
-  await chrome.alarms.create("timer", { delayInMinutes: .2, periodInMinutes: .6 });
+  await chrome.alarms.create("timer", { periodInMinutes: interval });
   // await chrome.alarms.create("update-timer", { delayInMinutes: interval, periodInMinutes: interval });
   await chrome.storage.local.set({ 'timer': { taskName, interval } });
-
-  // currentTask.timer = setInterval(function () {
-  //   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-  //     chrome.tabs.sendMessage(tabs[0].id, { taskName: currentTask.taskName });
-  //   });
-  // }, interval);
 }
 
 // Message interceptor
